@@ -1,3 +1,5 @@
+import os
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"  # Reduces camera load time SIGNIFICANTLY
 import tkinter as tk
 import cv2
 
@@ -44,22 +46,34 @@ start_btn.grid(row=3,column=1)
 
 root.mainloop()  # Start Tkinter GUI, blocking until start is entered
 
-
+# Done waiting for input, start workout tracking
 print(f'Starting workout: Reps: {reps}, Rest: {rest}, Sets: {sets}')
-# TODO: Insert workout tracking
 
-
-img = cv2.imread('apriltag_5.png', cv2.IMREAD_COLOR)
+video_capture = cv2.VideoCapture(0)  # 0 is default camera
 
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36h11)
 detectorParams = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(aruco_dict, detectorParams)
 
-(corners, ids, rejected) = detector.detectMarkers(img)
+video_capture = cv2.VideoCapture(0)
+if not video_capture.isOpened():
+    print('Error: Cannot open camera.'); 
 
-cv2.aruco.drawDetectedMarkers(img, corners, ids)
+while True:
+    result, video_frame = video_capture.read()
+    if not result: break
+        
+    #video_frame = cv2.flip(video_frame, 1)
+    (corners, ids, rejected) = detector.detectMarkers(video_frame)
+    cv2.aruco.drawDetectedMarkers(video_frame, corners, ids)
 
-cv2.imshow('img', img)
-cv2.waitKey(0)
+    cv2.imshow("Workout Tracker", video_frame)
+
+    k = cv2.waitKey(1)
+    if k == ord('q'):  # q to stop
+        break
+
+
+video_capture.release()
 cv2.destroyAllWindows()
 
