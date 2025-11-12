@@ -1,21 +1,23 @@
 import tkinter as tk
- 
+import cv2
 
 root=tk.Tk()
 
 # Small default values for testing
-reps_var = tk.IntVar(value=5)  # how many are performed before the rest interval
-rest_var = tk.IntVar(value=10)  # how long the person rests before the next repetition starts. The rest interval is specified in seconds
-sets_var = tk.IntVar(value=3)  # how many groups of repetitions will be performed
+reps = 5
+rest = 10
+sets = 3
+
+reps_var = tk.IntVar(value=reps)  # how many are performed before the rest interval
+rest_var = tk.IntVar(value=rest)  # how long the person rests before the next repetition starts. The rest interval is specified in seconds
+sets_var = tk.IntVar(value=sets)  # how many groups of repetitions will be performed
 
 def start():
-
+    global reps, rest, sets
     reps = reps_var.get()
     rest = rest_var.get()
     sets = sets_var.get()
-
-    print(f'Starting workout: Reps: {reps}, Rest: {rest}, Sets: {sets}')
-    # TODO: Enter curl tracking logic
+    root.quit()  # stop blocking on input
 
 
 # Labels
@@ -39,7 +41,9 @@ sets_label.grid(row=2,column=0)
 sets_entry.grid(row=2,column=1)
 start_btn.grid(row=3,column=1)
 
-root.mainloop()  # Start Tkinter gui
+root.mainloop()  # Start Tkinter GUI, blocking until start is entered
 
 
+print(f'Starting workout: Reps: {reps}, Rest: {rest}, Sets: {sets}')
+# TODO: Insert workout tracking
 
