@@ -1,6 +1,7 @@
 import tkinter as tk
 import cv2
 
+
 root=tk.Tk()
 
 # Small default values for testing
@@ -46,4 +47,19 @@ root.mainloop()  # Start Tkinter GUI, blocking until start is entered
 
 print(f'Starting workout: Reps: {reps}, Rest: {rest}, Sets: {sets}')
 # TODO: Insert workout tracking
+
+
+img = cv2.imread('apriltag_robots_overlay.jpg', cv2.IMREAD_COLOR)
+
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36h11)
+detectorParams = cv2.aruco.DetectorParameters()
+detector = cv2.aruco.ArucoDetector(aruco_dict, detectorParams)
+
+(corners, ids, rejected) = detector.detectMarkers(img)
+
+cv2.aruco.drawDetectedMarkers(img, corners, ids)
+
+cv2.imshow('img', img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
