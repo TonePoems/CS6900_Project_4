@@ -49,7 +49,7 @@ print(f'Starting workout: Reps: {reps}, Rest: {rest}, Sets: {sets}')
 # TODO: Insert workout tracking
 
 
-img = cv2.imread('apriltag_robots_overlay.jpg', cv2.IMREAD_COLOR)
+img = cv2.imread('apriltag_5.png', cv2.IMREAD_COLOR)
 
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36h11)
 detectorParams = cv2.aruco.DetectorParameters()
