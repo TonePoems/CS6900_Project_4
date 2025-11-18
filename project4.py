@@ -61,12 +61,22 @@ current_set = 1
 current_rep = 0
 # State can be "Exercise", "Rest", or "Done"
 workout_state = "Exercise" 
+rest_timer = rest
 
 
-def end_rest():
-    global workout_state
-    if workout_state=="Rest":
+def tick_rest():  # called every second to update rest timer
+    global workout_state, rest_timer, rest
+
+    if rest_timer==0:
+        rest_timer = rest  # reset to max rest
         workout_state="Exercise"
+    else:
+        rest_timer-=1
+        workout_state=f"Rest: {rest_timer} sec"
+        t = Timer(1, tick_rest)
+        t.start()
+    
+    
 
 # function to handle counting reps and switching sets
 def count_rep():
@@ -79,14 +89,14 @@ def count_rep():
         if (current_rep == reps):
             current_rep=0
             current_set+=1
-            workout_state="Rest"
+            workout_state=f"Rest: {rest} sec"
 
             if (current_set == sets+1):
                 current_rep=reps
                 current_set=sets
                 workout_state="Done"
             else:
-                t = Timer(rest, end_rest)
+                t = Timer(1, tick_rest)
                 t.start()
 
 
@@ -148,8 +158,6 @@ while True:
         break
     elif k == ord('r'):  # r to advance rep (for debugging)
         count_rep()
-    elif k == ord('z'):  # z to end rest (for debugging)
-        end_rest()
     
 
 video_capture.release()
