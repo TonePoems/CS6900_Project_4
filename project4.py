@@ -61,6 +61,27 @@ current_rep = 0
 # State can be "Exercise", "Rest", or "Done"
 workout_state = "Exercise" 
 
+# function to handle counting reps and switching sets
+def count_rep():
+    global reps, rest, sets
+    global current_set, current_rep, workout_state
+    
+    current_rep+=1
+
+    if (current_rep == reps):
+        current_rep=0
+        current_set+=1
+        workout_state="Rest"
+
+        if (current_set == sets+1):
+            workout_state="Done"
+
+def end_rest():
+    global workout_state
+    
+    workout_state="Exercise"
+
+
 # UI Display settings
 font = cv2.FONT_HERSHEY_SIMPLEX
 font_scale = 0.8
@@ -116,7 +137,11 @@ while True:
     k = cv2.waitKey(1)
     if k == ord('q'):  # q to stop
         break
-
+    elif k == ord('r'):  # r to advance rep (for debugging)
+        count_rep()
+    elif k == ord('z'):  # z to end rest (for debugging)
+        end_rest()
+    
 
 video_capture.release()
 cv2.destroyAllWindows()
