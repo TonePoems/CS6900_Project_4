@@ -2,6 +2,7 @@ import os
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"  # Reduces camera load time SIGNIFICANTLY
 import tkinter as tk
 import cv2
+from threading import Timer
 
 
 root=tk.Tk()
@@ -61,25 +62,33 @@ current_rep = 0
 # State can be "Exercise", "Rest", or "Done"
 workout_state = "Exercise" 
 
+
+def end_rest():
+    global workout_state
+    if workout_state=="Rest":
+        workout_state="Exercise"
+
 # function to handle counting reps and switching sets
 def count_rep():
     global reps, rest, sets
     global current_set, current_rep, workout_state
     
-    current_rep+=1
+    if workout_state=="Exercise":
+        current_rep+=1
 
-    if (current_rep == reps):
-        current_rep=0
-        current_set+=1
-        workout_state="Rest"
+        if (current_rep == reps):
+            current_rep=0
+            current_set+=1
+            workout_state="Rest"
 
-        if (current_set == sets+1):
-            workout_state="Done"
+            if (current_set == sets+1):
+                current_rep=reps
+                current_set=sets
+                workout_state="Done"
+            else:
+                t = Timer(rest, end_rest)
+                t.start()
 
-def end_rest():
-    global workout_state
-    
-    workout_state="Exercise"
 
 
 # UI Display settings
