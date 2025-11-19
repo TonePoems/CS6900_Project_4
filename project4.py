@@ -138,25 +138,45 @@ while True:
 
     if pose_results.pose_landmarks is not None:  # avoid errors if no pose detected
 
-        # TODO: Only draw relevant landmarks
-        mp_drawing.draw_landmarks(video_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-        # pose estimation reference points https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker#pose_landmarker_model
+       # UPDATED SKELETON & VARIABLES (TODO #1 Fixed)
+    
+     if pose_results.pose_landmarks:
+        # 1. Get Coordinates (X and Y for drawing)
+        # Left Shoulder
+        shoulder_y = int(h * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].y)
+        shoulder_x = int(w * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x)
+        # Left Elbow
+        elbow_y = int(h * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].y)
+        elbow_x = int(w * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].x)
+        # Left Wrist
+        wrist_y = int(h * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y)
+        wrist_x = int(w * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x)
+        # Left Hip (Waist)
+        waist_y = int(h * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y)
+        waist_x = int(w * pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].x)
 
-        # Perform logic for rep counting
-        # Proper reps based on https://www.athleticinsight.com/exercise/biceps/dumbbell-curl
-        # TODO: Set these false and test for them with the proper pose coordinate math
-        shoulder_stationary, elbow_stationary = True, True  # User should keep these stationary once started
-        vertical = True  # user should not be leaning forward or backwards
-        
-        DISTANCE_TOLERANCE = 0.009
+        # 2. Draw the Clean Stick Figure
+        # Connect Shoulder to Elbow
+        cv2.line(video_frame, (shoulder_x, shoulder_y), (elbow_x, elbow_y), (255, 255, 255), 4)
+        # Connect Elbow to Wrist
+        cv2.line(video_frame, (elbow_x, elbow_y), (wrist_x, wrist_y), (255, 255, 255), 4)
+        # Connect Shoulder to Hip (Reference line)
+        cv2.line(video_frame, (shoulder_x, shoulder_y), (waist_x, waist_y), (255, 255, 255), 2)
+
+        # 3. Draw Joints (Green Circles)
+        cv2.circle(video_frame, (shoulder_x, shoulder_y), 7, (0, 255, 0), -1)
+        cv2.circle(video_frame, (elbow_x, elbow_y), 7, (0, 255, 0), -1)
+        cv2.circle(video_frame, (wrist_x, wrist_y), 7, (0, 255, 0), -1)
+
+        # 4. Variables for Logic (Required for Rep Counting)
         shoulder_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].y
-        elbow_x = int(w*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].x)
-        elbow_y = int(h*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].y)
-        waist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y
         wrist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y
-        
-        wrist_x = int(w*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x)
-        wrist_y = int(h*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y)
+        waist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y
+        DISTANCE_TOLERANCE = 0.06 
+
+        # TODO: Set these false and test for them (we keep them True for now)
+        shoulder_stationary, elbow_stationary = True, True  
+        vertical = True
 
         if not hit_top:
             # Draw next pose at top of rep
