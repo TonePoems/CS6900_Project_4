@@ -149,6 +149,21 @@ while True:
     # 3. Display Workout State
     cv2.putText(video_frame, workout_state, 
                 (text_x, state_y), font, font_scale, (0, 255, 0), thickness) # Green
+    weight_text = "Weight: --"
+    
+    # Check if any tags were detected
+    if ids is not None:
+        flat_ids = ids.flatten()
+        if 5 in flat_ids:
+            weight_text = "Weight: 5 lbs"
+        elif 10 in flat_ids:
+            weight_text = "Weight: 10 lbs"
+    
+    # Display at bottom-right
+    # (h - 30) puts it near the bottom of the screen
+    cv2.putText(video_frame, weight_text, (w - 250, h - 30), 
+                font, font_scale, (0, 255, 255), thickness) # Yellow text
+    
     cv2.imshow("Workout Tracker", video_frame)
 
     
