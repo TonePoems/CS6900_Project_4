@@ -150,17 +150,32 @@ while True:
         
         DISTANCE_TOLERANCE = 0.009
         shoulder_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].y
+        elbow_x = int(w*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].x)
+        elbow_y = int(h*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].y)
         waist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y
         wrist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y
+        
+        wrist_x = int(w*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x)
+        wrist_y = int(h*pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y)
 
-        if not hit_top and abs(wrist_height - shoulder_height) < DISTANCE_TOLERANCE:
-            hit_top = True
-            hit_bottom = False
-            #print("hit_top")
+        if not hit_top:
+            # Draw next pose at top of rep
+            shoulder_y = int(h*shoulder_height)  # pixel coord of shoulder
+            cv2.circle(video_frame, center=(wrist_x, wrist_y), radius=5, color=(0, 255, 0), thickness=2)
+            cv2.circle(video_frame, center=(elbow_x, elbow_y), radius=5, color=(0, 255, 0), thickness=2)
 
-        if not hit_bottom and abs(wrist_height - waist_height) < DISTANCE_TOLERANCE:
-            hit_bottom = True
-            #print("hit_bottom")
+            if abs(wrist_height - shoulder_height) < DISTANCE_TOLERANCE:
+                hit_top = True
+                hit_bottom = False
+                #print("hit_top")
+
+        if not hit_bottom:
+            # Draw next pose at bottom of rep
+
+
+            if abs(wrist_height - waist_height) < DISTANCE_TOLERANCE:
+                hit_bottom = True
+                #print("hit_bottom")
 
 
         if hit_top and hit_bottom and shoulder_stationary and elbow_stationary and vertical:
