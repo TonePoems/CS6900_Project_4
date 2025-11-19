@@ -3,7 +3,13 @@ os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"  # Reduces camera l
 import tkinter as tk
 import cv2
 from threading import Timer
+import mediapipe as mp
 
+
+# Pose Estimation
+mp_drawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 root=tk.Tk()
 
@@ -75,8 +81,7 @@ def tick_rest():  # called every second to update rest timer
         workout_state=f"Rest: {rest_timer} sec"
         t = Timer(1, tick_rest)
         t.start()
-    
-    
+
 
 # function to handle counting reps and switching sets
 def count_rep():
@@ -98,7 +103,6 @@ def count_rep():
             else:
                 t = Timer(1, tick_rest)
                 t.start()
-
 
 
 # UI Display settings
@@ -149,6 +153,11 @@ while True:
     # 3. Display Workout State
     cv2.putText(video_frame, workout_state, 
                 (text_x, state_y), font, font_scale, (0, 255, 0), thickness) # Green
+    
+    frame_rgb = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
+    pose_results = pose.process(frame_rgb)
+    mp_drawing.draw_landmarks(video_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
     cv2.imshow("Workout Tracker", video_frame)
 
     
