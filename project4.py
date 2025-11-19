@@ -69,6 +69,9 @@ current_rep = 0
 workout_state = "Exercise" 
 rest_timer = rest
 
+# For rep state tracking
+hit_top, hit_bottom = False, False
+
 
 def tick_rest():  # called every second to update rest timer
     global workout_state, rest_timer, rest
@@ -128,6 +131,44 @@ while True:
     box_top_left = (w - 260, 30)  # 300px from right edge, 30px from top
     box_bottom_right = (w - 30, 150) # 30px from right edge, 180px from top
     
+
+    # Get pose data
+    frame_rgb = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
+    pose_results = pose.process(frame_rgb)
+
+    if pose_results.pose_landmarks is not None:  # avoid errors if no pose detected
+
+        # TODO: Only draw relevant landmarks
+        mp_drawing.draw_landmarks(video_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        # pose estimation reference points https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker#pose_landmarker_model
+
+        # Perform logic for rep counting
+        # Proper reps based on https://www.athleticinsight.com/exercise/biceps/dumbbell-curl
+        # TODO: Set these false and test for them with the proper pose coordinate math
+        shoulder_stationary, elbow_stationary = True, True  # User should keep these stationary once started
+        vertical = True  # user should not be leaning forward or backwards
+        
+        DISTANCE_TOLERANCE = 0.009
+        shoulder_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].y
+        waist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y
+        wrist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y
+
+        if not hit_top and abs(wrist_height - shoulder_height) < DISTANCE_TOLERANCE:
+            hit_top = True
+            hit_bottom = False
+            #print("hit_top")
+
+        if not hit_bottom and abs(wrist_height - waist_height) < DISTANCE_TOLERANCE:
+            hit_bottom = True
+            #print("hit_bottom")
+
+
+        if hit_top and hit_bottom and shoulder_stationary and elbow_stationary and vertical:
+            count_rep()
+            # reset trackers for initial coordinates 
+            hit_top, hit_bottom = False, False 
+
+
     # Draws the black box with 50% transparency (alpha)
     overlay = video_frame.copy()
     cv2.rectangle(overlay, box_top_left, box_bottom_right, (0, 0, 0), -1) # Black
@@ -154,14 +195,10 @@ while True:
     cv2.putText(video_frame, workout_state, 
                 (text_x, state_y), font, font_scale, (0, 255, 0), thickness) # Green
     
-    frame_rgb = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
-    pose_results = pose.process(frame_rgb)
-    mp_drawing.draw_landmarks(video_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
     cv2.imshow("Workout Tracker", video_frame)
 
-    
-
+    # Controls
     k = cv2.waitKey(1)
     if k == ord('q'):  # q to stop
         break
