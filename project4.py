@@ -174,9 +174,35 @@ while True:
         waist_height = pose_results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y
         DISTANCE_TOLERANCE = 0.06 
 
-        # TODO: Set these false and test for them (we keep them True for now)
-        shoulder_stationary, elbow_stationary = True, True  
-        vertical = True
+        #FORM CHECKING LOGIC (TODO #2 Fixed)
+        
+        # 1. Check if Body is Vertical (No leaning back/swinging)
+        # We check if the horizontal distance between shoulder and hip is small
+        # We use a tolerance relative to the screen width (e.g., 5% of width)
+        if abs(shoulder_x - waist_x) < (w * 0.05):
+            vertical = True
+            color_body = (0, 255, 0) # Green if good
+        else:
+            vertical = False
+            color_body = (0, 0, 255) # Red if leaning
+            # Draw a line to show the error
+            cv2.line(video_frame, (shoulder_x, shoulder_y), (waist_x, waist_y), color_body, 4)
+
+        # 2. Check if Elbow is Stationary (Pinned to side, not swinging forward)
+        # In a strict curl, the elbow should be roughly under the shoulder (same X)
+        if abs(shoulder_x - elbow_x) < (w * 0.1): # Slightly larger tolerance for elbow
+            elbow_stationary = True
+            color_elbow = (0, 255, 0)
+        else:
+            elbow_stationary = False
+            color_elbow = (0, 0, 255)
+            # Highlight the bad elbow position
+            cv2.circle(video_frame, (elbow_x, elbow_y), 15, color_elbow, 2)
+            
+        # For this simple tracker, we treat shoulder_stationary as linked to vertical body
+        shoulder_stationary = vertical 
+        
+
 
         if not hit_top:
             # Draw next pose at top of rep
