@@ -124,7 +124,7 @@ while True:
         
     #video_frame = cv2.flip(video_frame, 1)
     (corners, ids, rejected) = detector.detectMarkers(video_frame)
-    cv2.aruco.drawDetectedMarkers(video_frame, corners, ids)
+    #cv2.aruco.drawDetectedMarkers(video_frame, corners, ids)
 
     # We get the frame width (w) to align to the right side
     h, w, _ = video_frame.shape 
@@ -229,6 +229,7 @@ while True:
             # reset trackers for initial coordinates 
             hit_top, hit_bottom = False, False 
 
+    video_frame = cv2.flip(video_frame, 1)
 
     # Draws the black box with 50% transparency (alpha)
     overlay = video_frame.copy()
