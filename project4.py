@@ -114,6 +114,8 @@ font_scale = 0.8
 font_color = (255, 255, 255) # White
 thickness = 2
 
+weight_text = "Weight: --"
+
 video_capture = cv2.VideoCapture(0)
 if not video_capture.isOpened():
     print('Error: Cannot open camera.'); 
@@ -256,7 +258,6 @@ while True:
     # 3. Display Workout State
     cv2.putText(video_frame, workout_state, 
                 (text_x, state_y), font, font_scale, (0, 255, 0), thickness) # Green
-    weight_text = "Weight: --"
     
     # Check if any tags were detected
     if ids is not None:
