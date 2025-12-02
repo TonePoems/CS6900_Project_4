@@ -1,4 +1,5 @@
 import os
+import datetime
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"  # Reduces camera load time SIGNIFICANTLY
 import tkinter as tk
 import cv2
@@ -10,6 +11,12 @@ import mediapipe as mp
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
+def save_photo(img):
+    date_time = datetime.datetime.now().strftime('%Y%m%d_%H-%M-%S')
+    title = f'./incorrect_poses/{date_time}.png'
+    #print(title)
+    cv2.imwrite(title, img)
 
 root=tk.Tk()
 
@@ -181,6 +188,7 @@ while True:
 
         #FORM CHECKING LOGIC (TODO #2 Fixed)
         
+        save_pose = False
         # 1. Check if Body is Vertical (No leaning back/swinging)
         # We check if the horizontal distance between shoulder and hip is small
         # We use a tolerance relative to the screen width (e.g., 5% of width)
@@ -198,6 +206,7 @@ while True:
                 hit_bottom = True
                 print("Leaning too much. Restart rep!")
                 warning_printed_lean = True
+                save_pose = True
 
         # 2. Check if Elbow is Stationary (Pinned to side, not swinging forward)
         # In a strict curl, the elbow should be roughly under the shoulder (same X)
@@ -215,6 +224,7 @@ while True:
                 hit_bottom = True
                 print("Elbow Moved too far. Restart rep!")
                 warning_printed_elbow = True
+                save_pose = True
             
         # For this simple tracker, we treat shoulder_stationary as linked to vertical body
         shoulder_stationary = vertical 
@@ -247,6 +257,8 @@ while True:
             hit_top, hit_bottom = False, False 
 
     video_frame = cv2.flip(video_frame, 1)
+    if save_pose:
+        save_photo(video_frame)
 
     # Draws the black box with 50% transparency (alpha)
     overlay = video_frame.copy()
