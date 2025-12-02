@@ -84,7 +84,7 @@ save_pose = False
 hit_top, hit_bottom = False, False
 
 
-#new
+
 def play_beep(freq, duration):
     # Runs the beep in a separate thread so video doesn't freeze
     threading.Thread(target=winsound.Beep, args=(freq, duration), daemon=True).start()
@@ -212,6 +212,7 @@ while True:
 
         #FORM CHECKING LOGIC (TODO #2 Fixed)
         
+        save_pose = False
         # 1. Check if Body is Vertical (No leaning back/swinging)
         # We check if the horizontal distance between shoulder and hip is small
         # We use a tolerance relative to the screen width (e.g., 5% of width)
