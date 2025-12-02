@@ -116,6 +116,9 @@ thickness = 2
 
 weight_text = "Weight: --"
 
+warning_printed_lean = False  # prevent excessive pose warnings
+warning_printed_elbow = False  # prevent excessive pose warnings
+
 video_capture = cv2.VideoCapture(0)
 if not video_capture.isOpened():
     print('Error: Cannot open camera.'); 
@@ -184,22 +187,34 @@ while True:
         if abs(shoulder_x - waist_x) < (w * 0.05):
             vertical = True
             color_body = (0, 255, 0) # Green if good
+            warning_printed_lean = False
         else:
             vertical = False
             color_body = (0, 0, 255) # Red if leaning
             # Draw a line to show the error
-            cv2.line(video_frame, (shoulder_x, shoulder_y), (waist_x, waist_y), color_body, 4)
+            cv2.line(video_frame, (shoulder_x, shoulder_y), (waist_x, waist_y), color_body, 8)
+            if not warning_printed_lean:  # to not blow up output
+                hit_top = False
+                hit_bottom = True
+                print("Leaning too much. Restart rep!")
+                warning_printed_lean = True
 
         # 2. Check if Elbow is Stationary (Pinned to side, not swinging forward)
         # In a strict curl, the elbow should be roughly under the shoulder (same X)
         if abs(shoulder_x - elbow_x) < (w * 0.1): # Slightly larger tolerance for elbow
             elbow_stationary = True
             color_elbow = (0, 255, 0)
+            warning_printed_elbow = False
         else:
             elbow_stationary = False
             color_elbow = (0, 0, 255)
             # Highlight the bad elbow position
-            cv2.circle(video_frame, (elbow_x, elbow_y), 15, color_elbow, 2)
+            cv2.circle(video_frame, (elbow_x, elbow_y), 15, color_elbow, 5)
+            if not warning_printed_elbow:  # to not blow up output
+                hit_top = False
+                hit_bottom = True
+                print("Elbow Moved too far. Restart rep!")
+                warning_printed_elbow = True
             
         # For this simple tracker, we treat shoulder_stationary as linked to vertical body
         shoulder_stationary = vertical 
@@ -215,7 +230,7 @@ while True:
             if abs(wrist_height - shoulder_height) < DISTANCE_TOLERANCE:
                 hit_top = True
                 hit_bottom = False
-                #print("hit_top")
+                print("hit_top")
 
         if not hit_bottom:
             # Draw next pose at bottom of rep
@@ -223,7 +238,7 @@ while True:
 
             if abs(wrist_height - waist_height) < DISTANCE_TOLERANCE:
                 hit_bottom = True
-                #print("hit_bottom")
+                print("hit_bottom")
 
 
         if hit_top and hit_bottom and shoulder_stationary and elbow_stationary and vertical:
