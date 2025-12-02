@@ -5,6 +5,8 @@ import tkinter as tk
 import cv2
 from threading import Timer
 import mediapipe as mp
+import winsound
+import threading
 
 
 # Pose Estimation
@@ -76,8 +78,17 @@ current_rep = 0
 workout_state = "Exercise" 
 rest_timer = rest
 
+save_pose = False
+
 # For rep state tracking
 hit_top, hit_bottom = False, False
+
+
+#new
+def play_beep(freq, duration):
+    # Runs the beep in a separate thread so video doesn't freeze
+    threading.Thread(target=winsound.Beep, args=(freq, duration), daemon=True).start()
+
 
 
 def tick_rest():  # called every second to update rest timer
@@ -86,6 +97,9 @@ def tick_rest():  # called every second to update rest timer
     if rest_timer==0:
         rest_timer = rest  # reset to max rest
         workout_state="Exercise"
+
+        # SOUND : "GO!" Signal (High pitch, alert sound)
+        play_beep(1200, 400)
     else:
         rest_timer-=1
         workout_state=f"Rest: {rest_timer} sec"
@@ -101,15 +115,23 @@ def count_rep():
     if workout_state=="Exercise":
         current_rep+=1
 
+        # SOUND 1: Rep Counted (High pitch, short)
+        play_beep(1000, 150)
+
         if (current_rep == reps):
             current_rep=0
             current_set+=1
             workout_state=f"Rest: {rest} sec"
 
+            #SOUND 2: Rest Started (Lower pitch, longer)
+            play_beep(600, 600)
+
             if (current_set == sets+1):
                 current_rep=reps
                 current_set=sets
                 workout_state="Done"
+                #SOUND 3: Workout Complete (Victory sound!)
+                play_beep(800, 900)
             else:
                 t = Timer(1, tick_rest)
                 t.start()
