@@ -147,6 +147,8 @@ while True:
     # Get pose data
     frame_rgb = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
     pose_results = pose.process(frame_rgb)
+    
+    save_pose = False
 
     if pose_results.pose_landmarks is not None:  # avoid errors if no pose detected
 
@@ -188,7 +190,6 @@ while True:
 
         #FORM CHECKING LOGIC (TODO #2 Fixed)
         
-        save_pose = False
         # 1. Check if Body is Vertical (No leaning back/swinging)
         # We check if the horizontal distance between shoulder and hip is small
         # We use a tolerance relative to the screen width (e.g., 5% of width)
